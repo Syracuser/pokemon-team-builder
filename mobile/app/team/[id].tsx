@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -9,11 +10,13 @@ import {
   Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { fetchTeam, removePokemon } from "../../services/api";
+import { fetchTeam, removePokemon, updateTeamName } from "../../services/api";
 
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [team, setTeam] = useState<any>(null);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
   const router = useRouter();
 
   const loadTeam = async () => {
@@ -55,7 +58,43 @@ export default function TeamDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{team.team_name}</Text>
+      {editing ? (
+        <View style={styles.renameRow}>
+          <TextInput
+            style={styles.renameInput}
+            value={editName}
+            onChangeText={setEditName}
+            autoFocus
+          />
+          <TouchableOpacity
+            style={styles.renameSave}
+            onPress={async () => {
+              if (!editName.trim()) return;
+              await updateTeamName(id, editName.trim());
+              setEditing(false);
+              loadTeam();
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>Save</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.renameCancel}
+            onPress={() => setEditing(false)}
+          >
+            <Text style={{ color: "#333", fontWeight: "bold" }}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.renameRow}>
+          <Text style={styles.title}>{team.team_name}</Text>
+          <TouchableOpacity
+            style={styles.renameBtn}
+            onPress={() => { setEditName(team.team_name); setEditing(true); }}
+          >
+            <Text style={{ color: "#2563eb", fontWeight: "600", fontSize: 13 }}>Rename</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <Text style={styles.subtitle}>
         {team.pokemon?.length || 0}/6 Pokemon
       </Text>
@@ -75,7 +114,13 @@ export default function TeamDetailScreen() {
             onLongPress={() => handleRemove(item.id, item.name)}
           >
             <View style={styles.pokemonInfo}>
-              <Text style={styles.pokemonName}>{item.name}</Text>
+              <View style={styles.nameRow}>
+                <Image
+                  source={{ uri: `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${item.name}.png` }}
+                  style={styles.pokemonSprite}
+                />
+                <Text style={styles.pokemonName}>{item.name}</Text>
+              </View>
               <View style={styles.typesRow}>
                 {item.types.map((t: string) => (
                   <View key={t} style={[styles.typeBadge, { backgroundColor: typeColor(t) }]}>
@@ -84,7 +129,16 @@ export default function TeamDetailScreen() {
                 ))}
               </View>
               <Text style={styles.detail}>Ability: {item.ability}</Text>
-              <Text style={styles.detail}>Item: {item.item}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                <Text style={styles.detail}>Item: </Text>
+                {item.item && item.item !== "None" && (
+                  <Image
+                    source={{ uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.item.toLowerCase().replace(/ /g, "-")}.png` }}
+                    style={{ width: 24, height: 24, marginRight: 4 }}
+                  />
+                )}
+                <Text style={styles.detail}>{item.item}</Text>
+              </View>
               <Text style={styles.detail}>
                 Moves: {item.moves.join(", ")}
               </Text>
@@ -141,12 +195,45 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   pokemonInfo: { flex: 1 },
+  nameRow: { flexDirection: "row" as const, alignItems: "center" as const, gap: 10, marginBottom: 4 },
+  pokemonSprite: { width: 56, height: 46 },
   pokemonName: { fontSize: 18, fontWeight: "bold", color: "#333", textTransform: "capitalize" },
   typesRow: { flexDirection: "row", gap: 6, marginTop: 4, marginBottom: 6 },
   typeBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
   typeText: { color: "#fff", fontSize: 12, fontWeight: "600", textTransform: "capitalize" },
   detail: { fontSize: 13, color: "#555", marginTop: 2, textTransform: "capitalize" },
-  buttonRow: { flexDirection: "row", gap: 10, marginTop: 10 },
+  renameRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 4 },
+  renameInput: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: "bold",
+    padding: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  renameSave: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: "#16a34a",
+    borderRadius: 6,
+  },
+  renameCancel: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: "#e5e5e5",
+    borderRadius: 6,
+  },
+  renameBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: "#eff6ff",
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+    borderRadius: 6,
+  },
+  buttonRow: { flexDirection: "row", gap: 10, marginTop: 10, marginBottom: 24 },
   addButton: {
     flex: 1,
     backgroundColor: "#dc2626",

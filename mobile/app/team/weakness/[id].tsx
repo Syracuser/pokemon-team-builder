@@ -22,8 +22,8 @@ function multColor(mult: number): string {
   if (mult <= 0.25) return "#2d8a4e";
   if (mult <= 0.5) return "#4ade80";
   if (mult === 1) return "#e5e5e5";
-  if (mult === 2) return "#f87171";
-  return "#dc2626";
+  if (mult === 2) return "#dc2626";
+  return "#991b1b";
 }
 
 function multLabel(mult: number): string {
@@ -31,8 +31,8 @@ function multLabel(mult: number): string {
   if (mult === 0.25) return "\u00bc";
   if (mult === 0.5) return "\u00bd";
   if (mult === 1) return "1";
-  if (mult === 2) return "2";
-  if (mult === 4) return "4";
+  if (mult === 2) return "2x";
+  if (mult === 4) return "4x";
   return String(mult);
 }
 
@@ -131,7 +131,7 @@ export default function WeaknessScreen() {
                 {pokemonNames.map((name: string, i: number) => (
                   <View key={i} style={styles.chartHeaderCell}>
                     <Text style={styles.chartHeaderText} numberOfLines={1}>
-                      {name.slice(0, 5)}
+                      {name}
                     </Text>
                   </View>
                 ))}
@@ -141,7 +141,7 @@ export default function WeaknessScreen() {
                 ([atkType, mults]: [string, any]) => (
                   <View key={atkType} style={styles.chartRow}>
                     <View style={[styles.chartLabelCell, { backgroundColor: TYPE_COLORS[atkType] }]}>
-                      <Text style={styles.chartLabelText}>{atkType.slice(0, 4)}</Text>
+                      <Text style={styles.chartLabelText}>{atkType}</Text>
                     </View>
                     {mults.map((m: number, i: number) => (
                       <View
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   // Type chart grid
   chartRow: { flexDirection: "row" },
   chartLabelCell: {
-    width: 50,
+    width: 72,
     height: 32,
     justifyContent: "center",
     alignItems: "center",
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   chartLabelText: { color: "#fff", fontSize: 10, fontWeight: "bold", textTransform: "capitalize" },
   chartHeaderCell: {
-    width: 50,
+    width: 72,
     height: 32,
     justifyContent: "center",
     alignItems: "center",
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   chartHeaderText: { fontSize: 10, fontWeight: "600", textTransform: "capitalize", color: "#333" },
   chartCell: {
-    width: 50,
+    width: 72,
     height: 32,
     justifyContent: "center",
     alignItems: "center",

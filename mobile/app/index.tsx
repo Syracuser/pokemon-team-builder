@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { fetchTeams, deleteTeam } from "../services/api";
@@ -61,12 +62,32 @@ export default function TeamListScreen() {
           <TouchableOpacity
             style={styles.card}
             onPress={() => router.push(`/team/${item._id}`)}
-            onLongPress={() => handleDelete(item._id, item.team_name)}
           >
-            <Text style={styles.teamName}>{item.team_name}</Text>
-            <Text style={styles.pokemonCount}>
-              {item.pokemon?.length || 0}/6 Pokemon
-            </Text>
+            <View style={styles.cardHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.teamName}>{item.team_name}</Text>
+                <Text style={styles.pokemonCount}>
+                  {item.pokemon?.length || 0}/6 Pokemon
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => handleDelete(item._id, item.team_name)}
+              >
+                <Text style={styles.deleteBtnText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+            {item.pokemon?.length > 0 && (
+              <View style={styles.spriteRow}>
+                {item.pokemon.map((p: any, i: number) => (
+                  <Image
+                    key={i}
+                    source={{ uri: `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${p.name}.png` }}
+                    style={styles.miniSprite}
+                  />
+                ))}
+              </View>
+            )}
           </TouchableOpacity>
         )}
       />
@@ -95,7 +116,19 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   teamName: { fontSize: 18, fontWeight: "bold", color: "#333" },
+  cardHeader: { flexDirection: "row", alignItems: "center" },
   pokemonCount: { fontSize: 14, color: "#666", marginTop: 4 },
+  deleteBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: "#fee2e2",
+    borderWidth: 1,
+    borderColor: "#fca5a5",
+    borderRadius: 6,
+  },
+  deleteBtnText: { color: "#dc2626", fontWeight: "600", fontSize: 13 },
+  spriteRow: { flexDirection: "row", gap: 4, marginTop: 8 },
+  miniSprite: { width: 48, height: 40, resizeMode: "contain" as const },
   empty: { textAlign: "center", marginTop: 40, color: "#999", fontSize: 16 },
   fab: {
     position: "absolute",

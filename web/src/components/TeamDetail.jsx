@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchTeam, removePokemon } from "../services/api";
+import { fetchTeam, removePokemon, updateTeamName } from "../services/api";
 
 const TYPE_COLORS = {
   normal: "#A8A878", fire: "#F08030", water: "#6890F0", electric: "#F8D030",
@@ -20,9 +20,18 @@ function itemSlug(name) {
 export default function TeamDetail() {
   const { id } = useParams();
   const [team, setTeam] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
 
   const load = async () => setTeam(await fetchTeam(id));
   useEffect(() => { load(); }, [id]);
+
+  const handleRename = async () => {
+    if (!editName.trim()) return;
+    await updateTeamName(id, editName.trim());
+    setEditing(false);
+    load();
+  };
 
   const handleRemove = async (pokemonId, name) => {
     if (!confirm(`Remove ${name}?`)) return;
@@ -35,7 +44,31 @@ export default function TeamDetail() {
   return (
     <div>
       <Link to="/" style={{ color: "#dc2626", textDecoration: "none" }}>&larr; Back to teams</Link>
-      <h2 style={{ marginTop: 12 }}>{team.team_name}</h2>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+        {editing ? (
+          <>
+            <input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleRename()}
+              autoFocus
+              style={{ fontSize: 22, fontWeight: "bold", padding: "4px 8px", borderRadius: 6, border: "1px solid #ddd", flex: 1 }}
+            />
+            <button onClick={handleRename} style={{ padding: "6px 14px", backgroundColor: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Save</button>
+            <button onClick={() => setEditing(false)} style={{ padding: "6px 14px", backgroundColor: "#e5e5e5", color: "#333", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Cancel</button>
+          </>
+        ) : (
+          <>
+            <h2 style={{ margin: 0 }}>{team.team_name}</h2>
+            <button
+              onClick={() => { setEditName(team.team_name); setEditing(true); }}
+              style={{ padding: "4px 10px", backgroundColor: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+            >
+              Rename
+            </button>
+          </>
+        )}
+      </div>
       <p style={{ color: "#666" }}>{team.pokemon?.length || 0}/6 Pokemon</p>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>

@@ -1,5 +1,18 @@
-const API_BASE = "http://10.0.2.2:8000/api"; // Android emulator -> localhost
-// For physical device, replace with your machine's local IP
+import Constants from "expo-constants";
+
+function getApiBase(): string {
+  // Expo dev server knows the host IP — extract it from the manifest
+  const debuggerHost =
+    Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (debuggerHost) {
+    const ip = debuggerHost.split(":")[0];
+    return `http://${ip}:8000/api`;
+  }
+  // Fallback for production or web
+  return "http://localhost:8000/api";
+}
+
+const API_BASE = getApiBase();
 
 export async function fetchTeams() {
   const res = await fetch(`${API_BASE}/teams`);
@@ -82,5 +95,10 @@ export async function searchPokemon(query: string) {
 
 export async function fetchPokemonDetails(name: string) {
   const res = await fetch(`${API_BASE}/pokemon/${encodeURIComponent(name)}`);
+  return res.json();
+}
+
+export async function searchItems(query: string) {
+  const res = await fetch(`${API_BASE}/items/search?q=${encodeURIComponent(query)}`);
   return res.json();
 }
