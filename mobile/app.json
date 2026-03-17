@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Pokemon Team Builder",
+    "slug": "pokemon-team-builder",
+    "scheme": "pokemon-team-builder",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {},
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
